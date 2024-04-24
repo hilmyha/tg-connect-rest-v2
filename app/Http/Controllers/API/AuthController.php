@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -26,8 +28,6 @@ class AuthController extends Controller
 
         $token = $user->createToken('token')->plainTextToken;
 
-        $cookie = cookie('jwt', $token, 5259600);
-
         return response()->json([
             'status' => true,
             'message' => 'User registered successfully',
@@ -35,7 +35,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token
             ]
-        ])->withCookie($cookie);
+        ], 201);
     }
 
     /**
@@ -46,40 +46,38 @@ class AuthController extends Controller
             'username' => 'required|string',
             'password' => 'required|string'
         ]);
+        
+        $user = User::where('username', $request->username)->first();
 
-        if (!auth()->attempt($request->all())) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid credentials'
-            ], 401);
+        if(!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'username' => ['The provided credentials are incorrect.'],
+            ]);
         }
 
-        $user = Auth::user();
-
-        /** @var \App\Models\User $user **/ $token = $user->createToken('token')->plainTextToken;
-
-        $cookie = cookie('jwt', $token, 5259600);
+        // /** @var \App\Models\User $user **/ $token = $user->createToken('token')->plainTextToken;
 
         return response()->json([
             'status' => true,
             'message' => 'User logged in successfully',
             'data' => [
                 'user' => $user,
-                'token' => $token
+                'token' => $user->createToken('token')->plainTextToken,
             ]
-        ])->withCookie($cookie);
+        ], 200);
     }
 
     /**
      * Logout a user.
      */
     public function logout(Request $request) {
-        $cookie = Cookie::forget('jwt');
+        // delete token
+        $request->user()->currentAccessToken()->delete();
 
-        return response([
+        return response()->json([
             'status' => true,
-            'message' => 'Token deleted'
-        ])->withCookie($cookie);
+            'message' => 'User logged out successfully'
+        ], 200);
     }
 
     /**
@@ -87,8 +85,6 @@ class AuthController extends Controller
      */
     public function show(Request $request)
     {
-        // $cookie = cookie('token', $request->user()->currentAccessToken()->plainTextToken, 60 * 24); // 1 day
-
         return Auth::user();
     }
 
