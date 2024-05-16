@@ -61,6 +61,32 @@ class WargaController extends Controller
     }
 
     /**
+     * Recap all data warga to csv.
+     */
+
+    public function recap()
+    {
+        // rekap ke dalam file csv lalu kirim ke react untuk di download
+        $warga = Warga::all();
+        $filename = 'rekap_warga.csv';
+        $handle = fopen($filename, 'w+');
+        fputcsv($handle, array('ID', 'Nama KK', 'Blok', 'Jalan', 'Jumlah Keluarga', 'Status Kependudukan', 'Nomor HP'));
+
+        foreach ($warga as $row) {
+            fputcsv($handle, array($row['id'], $row['nama_kk'], $row['blok'], $row['jalan'], $row['jumlah_keluarga'], $row['status_kependudukan'], $row['nomor_hp']));
+        }
+
+        fclose($handle);
+
+        $headers = array(
+            'Content-Type' => 'text/csv',
+        );
+
+        return response()->download($filename, 'rekap_warga.csv', $headers);
+    }
+
+
+    /**
      * Display the specified resource.
      */
     public function show(Warga $warga)

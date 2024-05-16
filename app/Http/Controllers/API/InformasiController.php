@@ -57,7 +57,7 @@ class InformasiController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Get data informasi success!',
-            'data' => $informasi
+            'data' => $informasi->with(['user'])->where('user_id', auth()->id())->latest()->get()
         ], 200);
     }
 
@@ -65,6 +65,7 @@ class InformasiController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Informasi $informasi)
+    
     {
         $data = $request->validate([
             'judul' => 'required|string',
