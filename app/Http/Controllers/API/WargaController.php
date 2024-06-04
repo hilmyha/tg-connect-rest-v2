@@ -64,26 +64,158 @@ class WargaController extends Controller
      * Recap all data warga to csv.
      */
 
-    public function recap()
-    {
-        // rekap ke dalam file csv lalu kirim ke react untuk di download
-        $warga = Warga::all();
-        $filename = 'rekap_warga.csv';
-        $handle = fopen($filename, 'w+');
-        fputcsv($handle, array('ID', 'Nama KK', 'Blok', 'Jalan', 'Jumlah Keluarga', 'Status Kependudukan', 'Nomor HP'));
+    // public function recap()
+    // {
+    //     // rekap semua data warga dan jadikan csv di storage
+    //     $warga = Warga::all();
+    //     $filename = 'recap-warga-' . time() . '.csv';
+    //     $handle = fopen(storage_path('app/public/' . $filename), 'w');
 
-        foreach ($warga as $row) {
-            fputcsv($handle, array($row['id'], $row['nama_kk'], $row['blok'], $row['jalan'], $row['jumlah_keluarga'], $row['status_kependudukan'], $row['nomor_hp']));
+    //     fputcsv($handle, [
+    //         'ID',
+    //         'Nama KK',
+    //         'Blok',
+    //         'Jalan',
+    //         'Jumlah Keluarga',
+    //         'Status Kependudukan',
+    //         'Nomor HP',
+    //         'User ID',
+    //         'Created At',
+    //         'Updated At'
+    //     ]);
+
+    //     foreach ($warga as $row) {
+    //         fputcsv($handle, [
+    //             $row->id,
+    //             $row->nama_kk,
+    //             $row->blok,
+    //             $row->jalan,
+    //             $row->jumlah_keluarga,
+    //             $row->status_kependudukan,
+    //             $row->nomor_hp,
+    //             $row->user_id,
+    //             $row->created_at,
+    //             $row->updated_at
+    //         ]);
+    //     }
+
+    //     fclose($handle);
+
+    //     // store file csv rekap data warga
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Recap data warga success!',
+    //         'data' => asset('storage/' . $filename)
+    //     ], 200);
+    // }
+
+    public function recap()
+{
+    // rekap semua data warga dan jadikan csv di storage
+    $warga = Warga::all();
+    // set time ke timezone indonesia dan format tanggal dan waktu
+    $time = \Carbon\Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d-H-i-s');
+    $filename = 'recap-warga-' . $time . '.csv';
+    $handle = fopen(storage_path('app/public/' . $filename), 'w');
+
+    fputcsv($handle, [
+        'ID',
+        'Nama KK',
+        'Blok',
+        'Jalan',
+        'Jumlah Keluarga',
+        'Status Kependudukan',
+        'Nomor HP',
+        'User ID',
+        'Created At',
+        'Updated At'
+    ]);
+
+    foreach ($warga as $row) {
+        fputcsv($handle, [
+            $row->id,
+            $row->nama_kk,
+            $row->blok,
+            $row->jalan,
+            $row->jumlah_keluarga,
+            $row->status_kependudukan,
+            $row->nomor_hp,
+            $row->user_id,
+            $row->created_at,
+            $row->updated_at
+        ]);
+    }
+
+    fclose($handle);
+
+    // store file csv rekap data warga
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Recap data warga success!',
+        'data' => asset('storage/' . $filename)
+    ], 200);
+}
+
+
+    // public function downloadRecap()
+    // {
+    //     // download file csv rekap data warga
+    //     return response()->download(storage_path('app/public/recap-warga-' . time() . '.csv'));
+    // }
+
+    public function showRecap() {
+        $files = scandir(storage_path('app/public'));
+        $recaps = [];
+
+        foreach ($files as $file) {
+            if (pathinfo($file, PATHINFO_EXTENSION) == 'csv') {
+                $recaps[] = $file;
+            }
         }
 
-        fclose($handle);
-
-        $headers = array(
-            'Content-Type' => 'text/csv',
-        );
-
-        return response()->download($filename, 'rekap_warga.csv', $headers);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Get all recap data success!',
+            'data' => $recaps
+        ], 200);
     }
+
+    // show csv recap by filename
+    public function showRecapWarga($filename)
+    {
+        // tampikan file csv rekap data warga berdasarkan nama file
+        $filePath = storage_path('app/public/' . $filename);
+
+        if (!file_exists($filePath)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'File not found'
+            ], 404);
+        }
+
+        $data = array_map('str_getcsv', file($filePath));
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Get recap data success!',
+            'data' => $data
+        ], 200);
+    }
+
+    public function downloadRecap($filename)
+    {
+        $filePath = storage_path('app/public/' . $filename);
+        
+        if (!file_exists($filePath)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'File not found'
+            ], 404);
+        }
+
+        return response()->download($filePath);
+    }
+
 
 
     /**

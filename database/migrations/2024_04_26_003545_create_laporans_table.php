@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('perihal');
             $table->string('isi');
             $table->string('img_url')->nullable();
+            $table->foreignId('user_id');
             $table->timestamps();
         });
     }

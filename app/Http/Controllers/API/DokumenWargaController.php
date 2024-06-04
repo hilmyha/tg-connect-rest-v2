@@ -49,23 +49,23 @@ class DokumenWargaController extends Controller
     public function show(DokumenWarga $dokumenWarga)
     {
         
-        // return response()->json([
-        //     'status' => 'success',
-        //     'message' => 'Get data dokumen warga success!',
-        //     'data' => $dokumenWarga->with('user')->get()
-        // ], 200);
-
-        $image = asset('storage/' . $dokumenWarga->dokumen);
-
-        // masukkan image ke dalam array data
-        $data = $dokumenWarga->with('user')->get();
-        $data['image'] = $image;
-
         return response()->json([
             'status' => 'success',
             'message' => 'Get data dokumen warga success!',
-            'data' => $data
+            'data' => $dokumenWarga->get()
         ], 200);
+
+        // $image = asset('storage/' . $dokumenWarga->dokumen);
+
+        // masukkan image ke dalam array data
+        // $data = $dokumenWarga->with('user')->get();
+        // $data['image'] = $image;
+
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Get data dokumen warga success!',
+        //     'data' => $data
+        // ], 200);
     }
 
     /**
@@ -73,7 +73,22 @@ class DokumenWargaController extends Controller
      */
     public function update(Request $request, DokumenWarga $dokumenWarga)
     {
-        //
+        $data = $request->validate([
+            'dokumen' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'keterangan' => 'nullable|boolean',
+        ]);
+
+        // if ($request->hasFile('dokumen')) {
+        //     $data['dokumen'] = $request->file('dokumen')->store('dokumen');
+        // }
+
+        $dokumenWarga->update($data);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Update data dokumen warga success!',
+            'data' => $dokumenWarga
+        ], 200);
     }
 
     /**

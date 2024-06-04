@@ -22,6 +22,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/warga/{warga}', [WargaController::class, 'destroy']);
     // recap
     Route::get('/recap', [WargaController::class, 'recap']);
+    Route::get('/show-recap', [WargaController::class, 'showRecap']);
+    Route::get('/show-recap-warga/{warga}', [WargaController::class, 'showRecapWarga']);
+    Route::get('/download-recap/{filename}', [WargaController::class, 'downloadRecap']);
 
     // Informasi
     Route::get('/informasi', [InformasiController::class, 'index']);
@@ -41,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dokumen-warga', [DokumenWargaController::class, 'index']);
     Route::post('/dokumen-warga', [DokumenWargaController::class, 'store']);
     Route::get('/dokumen-warga/{dokumenWarga}', [DokumenWargaController::class, 'show']);
+    Route::put('/dokumen-warga/{dokumenWarga}', [DokumenWargaController::class, 'update']);
 
     // Panic
     Route::get('/panic', [PanicController::class, 'index']);
@@ -58,3 +62,10 @@ Route::group(['middleware' => 'auth:sanctum', 'is_admin'], function () {
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/test', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Test success!',
+    ], 200);
+});

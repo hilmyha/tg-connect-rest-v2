@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Informasi;
 use App\Models\Panic;
 use App\Models\User;
 use App\Models\Warga;
@@ -18,9 +19,17 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
+            'name' => 'Administrator',
+            'username' => 'admin',
+            'email' => 'admin@tgconnect.com',
+            'is_admin' => 1,
+            'password' => bcrypt('admin123')
+        ]);
+
+        User::factory()->create([
             'name' => 'Hilmy Ahmad Haidar',
             'username' => 'haidar',
-            'email' => 'haidar@haidar.com',
+            'email' => 'haidar@tgconnect.com',
             'is_admin' => 1,
             'password' => bcrypt('haidar123')
         ]);
@@ -28,11 +37,11 @@ class DatabaseSeeder extends Seeder
         Warga::factory()->create([
             'nama_kk' => 'Hilmy Ahmad Haidar',
             'blok' => 'D12',
-            'jalan' => 'Padjajaran',
+            'jalan' => 'Pajajaran',
             'jumlah_keluarga' => 4,
             'status_kependudukan' => 1,
-            'nomor_hp' => '081234567890',
-            'user_id' => 1
+            'nomor_hp' => '81234567890',
+            'user_id' => 2
         ]);
 
         Panic::factory()->create([
@@ -40,5 +49,7 @@ class DatabaseSeeder extends Seeder
             'longitude' => '109.02961871663125',
             'user_id' => 1
         ]);
+
+
     }
 }
